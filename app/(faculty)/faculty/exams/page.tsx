@@ -1858,11 +1858,11 @@ function FacultyExamsContent() {
                     {selectedStudentForReview.attempts[activeAttemptIndex].items.map((item) => (
                       <div
                         key={item.qNum}
-                        className={`p-6 border rounded-xl bg-white shadow-sm flex flex-col gap-3 border-l-4 transition-all ${
+                        className={`p-3 sm:p-6 border rounded-xl bg-white shadow-sm flex flex-col gap-3 border-l-4 transition-all ${
                           item.isCorrect ? 'border-l-emerald-500' : 'border-l-rose-500'
                         }`}
                       >
-                        <div className="flex justify-between items-start mb-2">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2">
                           <div className="flex items-center gap-3">
                             <span className="w-7 h-7 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-xs font-bold border border-slate-200 shrink-0">
                               {item.qNum}
@@ -1973,8 +1973,8 @@ function FacultyExamsContent() {
                     <table className="w-full text-left border-collapse min-w-[720px]">
                       <thead>
                         <tr className="bg-slate-50 border-b border-slate-200">
-                          <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Student Name</th>
-                          <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Cohort</th>
+                          <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 sticky left-0 bg-white shadow-[1px_0_0_0_rgba(0,0,0,0.1)] z-10">Student Name</th>
+                          <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 hidden md:table-cell">Cohort</th>
                           <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Status</th>
                           <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500">Score (%)</th>
                           <th className="p-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right">Attempts</th>
@@ -1991,8 +1991,8 @@ function FacultyExamsContent() {
 
                             return (
                               <tr key={student.id} className="hover:bg-slate-50 transition-colors bg-white">
-                                <td className="p-4 font-bold text-slate-800">{student.name}</td>
-                                <td className="p-4">
+                                <td className="p-4 font-bold text-slate-800 sticky left-0 bg-white shadow-[1px_0_0_0_rgba(0,0,0,0.1)] z-10">{student.name}</td>
+                                <td className="p-4 hidden md:table-cell">
                                   <span className="px-2 py-0.5 bg-slate-100 border border-slate-200 text-slate-600 rounded text-xs font-bold whitespace-nowrap">
                                     {cohortName}
                                   </span>
@@ -2046,7 +2046,7 @@ function FacultyExamsContent() {
                 </div>
 
                 {/* Controls in a Single Row */}
-                <div className="flex items-center gap-2.5 flex-wrap xl:flex-nowrap shrink-0">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2.5 shrink-0 w-full xl:w-auto mt-4 xl:mt-0">
                   {/* Hover Information Tooltip */}
                   <div className="relative group">
                     <button
@@ -2103,7 +2103,7 @@ function FacultyExamsContent() {
                   <select
                     value={analyticsAttemptBasis}
                     onChange={(e: any) => setAnalyticsAttemptBasis(e.target.value)}
-                    className="w-36 px-2.5 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 bg-white focus:outline-none focus:border-blue-500 shrink-0"
+                    className="w-full sm:w-36 px-2.5 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 bg-white focus:outline-none focus:border-blue-500 shrink-0"
                     title="Select Attempt Basis"
                   >
                     <option value="graded">Graded Attempt ({currentExam.gradingLogic})</option>
@@ -2115,7 +2115,7 @@ function FacultyExamsContent() {
                   <select
                     value={analyticsCohortFilter}
                     onChange={(e) => setAnalyticsCohortFilter(e.target.value)}
-                    className="w-32 px-2.5 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 bg-white focus:outline-none focus:border-blue-500 shrink-0"
+                    className="w-full sm:w-32 px-2.5 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 bg-white focus:outline-none focus:border-blue-500 shrink-0"
                     title="Filter by Cohort"
                   >
                     <option value="All">All Cohorts</option>
@@ -2131,7 +2131,7 @@ function FacultyExamsContent() {
                     <select
                       value={selectedCompetencyFilter}
                       onChange={(e) => setSelectedCompetencyFilter(e.target.value)}
-                      className="w-48 px-2.5 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 bg-white focus:outline-none focus:border-blue-500 shrink-0 truncate"
+                      className="w-full sm:w-48 px-2.5 py-2 border border-slate-300 rounded-lg text-xs font-bold text-slate-700 bg-white focus:outline-none focus:border-blue-500 shrink-0 truncate"
                       title={selectedCompetencyFilter === 'All' ? 'All Competencies' : selectedCompetencyFilter}
                     >
                       <option value="All">All Competencies ({questionAnalytics.length})</option>
@@ -2159,10 +2159,10 @@ function FacultyExamsContent() {
                     const isExpanded = !!expandedQuestionDetails[qa.id];
 
                     return (
-                      <div key={qa.id} className="p-6 border border-slate-200 rounded-xl bg-white shadow-sm">
+                      <div key={qa.id} className="p-3 sm:p-6 border border-slate-200 rounded-xl bg-white shadow-sm">
                         {/* Header: Question Number, Prompt Text, and Vertically Stacked P & D Badges */}
-                        <div className="flex justify-between items-start mb-5 pb-4 border-b border-slate-100 gap-4">
-                          <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-5 pb-4 border-b border-slate-100 gap-4">
+                          <div className="flex items-start gap-3 flex-1 min-w-0 w-full">
                             <span className="w-8 h-8 shrink-0 mt-0.5 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-sm font-bold border border-slate-200">
                               {index + 1}
                             </span>
@@ -2181,7 +2181,7 @@ function FacultyExamsContent() {
                           </div>
 
                           {/* Vertically Stacked Difficulty & Discrimination Badges */}
-                          <div className="flex flex-col items-end gap-1.5 shrink-0 self-start">
+                          <div className="flex flex-row flex-wrap items-center gap-1.5 sm:flex-col sm:items-end shrink-0 self-start">
                             {getDifficultyBadge(qa.facilityIndex, qa.facilityLabel)}
                             {getDiscriminationBadge(qa.discriminationIndex, qa.discriminationLabel)}
                           </div>
@@ -2457,7 +2457,7 @@ function FacultyExamsContent() {
         {filteredExams.map((exam) => (
           <div key={exam.id} className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col relative">
             <div className={`h-1.5 w-full ${exam.color}`}></div>
-            <div className="p-6 flex-1 flex flex-col justify-between">
+            <div className="p-3 sm:p-6 flex-1 flex flex-col justify-between">
               <div>
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="font-bold text-lg text-slate-800 leading-snug pr-3">{exam.title}</h3>
