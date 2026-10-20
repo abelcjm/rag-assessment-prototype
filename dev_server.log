@@ -1,0 +1,33 @@
+
+> rag-assessment-prototype@0.1.0 dev
+> next dev -p 3002
+
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3002
+- Network:       http://192.168.0.2:3002
+✓ Ready in 519ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+⨯ Error: supabaseKey is required.
+    at module evaluation (lib/supabaseClient.ts:6:37)
+    at module evaluation (app/(entry)/login/page.tsx:3:1)
+  4 | const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+  5 |
+> 6 | export const supabase = createClient(supabaseUrl, supabaseKey, {
+    |                                     ^
+  7 |   auth: {
+  8 |     // forces Supabase to use Cookies instead of Local Storage
+  9 |     storage: { {
+  digest: '1878066077'
+}
+ GET /login 500 in 1396ms (next.js: 290ms, application-code: 1106ms)
+[browser] Uncaught Error: supabaseKey is required.
+    at module evaluation (lib/supabaseClient.ts:6:37)
+    at module evaluation (app/(entry)/login/page.tsx:3:1)
+  4 | const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+  5 |
+> 6 | export const supabase = createClient(supabaseUrl, supabaseKey, {
+    |                                     ^
+  7 |   auth: {
+  8 |     // forces Supabase to use Cookies instead of Local Storage
+  9 |     storage: {

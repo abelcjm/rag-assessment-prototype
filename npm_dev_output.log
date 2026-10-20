@@ -1,0 +1,59 @@
+
+> rag-assessment-prototype@0.1.0 dev
+> next dev
+
+⚠ Port 3000 is in use by an unknown process, using available port 3001 instead.
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://192.168.0.2:3001
+✓ Ready in 556ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+
+○ Compiling /login ...
+⨯ Error: supabaseUrl is required.
+    at module evaluation (lib/supabaseClient.ts:6:37)
+    at module evaluation (app/(entry)/login/page.tsx:3:1)
+  4 | const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+  5 |
+> 6 | export const supabase = createClient(supabaseUrl, supabaseKey, {
+    |                                     ^
+  7 |   auth: {
+  8 |     // forces Supabase to use Cookies instead of Local Storage
+  9 |     storage: { {
+  digest: '633509089'
+}
+ GET /login 500 in 6.2s (next.js: 4.1s, application-code: 2.2s)
+[browser] Uncaught Error: supabaseUrl is required.
+    at module evaluation (lib/supabaseClient.ts:6:37)
+    at module evaluation (app/(entry)/login/page.tsx:3:1)
+  4 | const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+  5 |
+> 6 | export const supabase = createClient(supabaseUrl, supabaseKey, {
+    |                                     ^
+  7 |   auth: {
+  8 |     // forces Supabase to use Cookies instead of Local Storage
+  9 |     storage: {
+⨯ Error: supabaseUrl is required.
+    at module evaluation (lib/supabaseClient.ts:6:37)
+    at module evaluation (app/(entry)/login/page.tsx:3:1)
+  4 | const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+  5 |
+> 6 | export const supabase = createClient(supabaseUrl, supabaseKey, {
+    |                                     ^
+  7 |   auth: {
+  8 |     // forces Supabase to use Cookies instead of Local Storage
+  9 |     storage: { {
+  digest: '633509089'
+}
+ GET /login 500 in 628ms (next.js: 5ms, application-code: 622ms)
+[browser] Uncaught Error: supabaseUrl is required.
+    at module evaluation (lib/supabaseClient.ts:6:37)
+    at module evaluation (app/(entry)/login/page.tsx:3:1)
+  4 | const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+  5 |
+> 6 | export const supabase = createClient(supabaseUrl, supabaseKey, {
+    |                                     ^
+  7 |   auth: {
+  8 |     // forces Supabase to use Cookies instead of Local Storage
+  9 |     storage: {
+[?25h
