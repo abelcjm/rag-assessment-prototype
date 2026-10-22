@@ -50,7 +50,7 @@ type CustomBlock = {
   customSettingInput: string;
 };
 
-type Cohort = { id: string; name: string };
+type Cohort = { id: string; name: string; status?: 'Active' | 'Archived' };
 
 const getSourceFromPath = (path: string) => path.split('/').pop() || path;
 
@@ -125,14 +125,17 @@ export default function CreateExamPage() {
 
       const { data: cohortData } = await supabase
         .from('Cohort Teachers')
-        .select('cohort_id, Cohorts(cohort_name)')
+        .select('cohort_id, Cohorts(cohort_name, status)')
         .eq('teacher_id', user.id);
       
       if (cohortData) {
-        setCohorts(cohortData.map((ct: any) => ({
-          id: ct.cohort_id,
-          name: ct.Cohorts.cohort_name
-        })));
+        setCohorts(cohortData
+          .filter((ct: any) => ct.Cohorts?.status === 'Active')
+          .map((ct: any) => ({
+            id: ct.cohort_id,
+            name: ct.Cohorts.cohort_name,
+            status: ct.Cohorts.status
+          })));
       }
 
       const { data: materialData } = await supabase

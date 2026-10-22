@@ -211,7 +211,7 @@ function FacultyExamsContent() {
   const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
   const [regeneratingItems, setRegeneratingItems] = useState<string[]>([]);
 
-  const [teacherCohorts, setTeacherCohorts] = useState<{ id: string; name: string }[]>([]);
+  const [teacherCohorts, setTeacherCohorts] = useState<{ id: string; name: string; status?: 'Active' | 'Archived' }[]>([]);
   const [editSelectedCohorts, setEditSelectedCohorts] = useState<string[]>([]);
   const [isCohortDropdownOpen, setIsCohortDropdownOpen] = useState(false);
 
@@ -305,13 +305,14 @@ function FacultyExamsContent() {
 
       const { data: userCohorts } = await supabase
         .from('Cohort Teachers')
-        .select('cohort_id, Cohorts(cohort_name)')
+        .select('cohort_id, Cohorts(cohort_name, status)')
         .eq('teacher_id', user.id);
 
       const cohortIds = userCohorts?.map(c => c.cohort_id) || [];
       const fetchedTeacherCohorts = userCohorts?.map(c => ({
         id: c.cohort_id,
-        name: (c.Cohorts as any)?.cohort_name || 'Unknown Cohort'
+        name: (c.Cohorts as any)?.cohort_name || 'Unknown Cohort',
+        status: (c.Cohorts as any)?.status
       })) || [];
       
       setTeacherCohorts(fetchedTeacherCohorts);
@@ -340,7 +341,7 @@ function FacultyExamsContent() {
         .select(`
           exam_id, exam_title, exam_subject, schedule_start, schedule_end, passing_score, passing_percentage, time_limit_mins, global_status, references,
           max_attempts, close_after_deadline, grading_logic, is_visible,
-          Exam_Cohorts ( cohort_id, Cohorts ( cohort_name ) ),
+          Exam_Cohorts ( cohort_id, Cohorts ( cohort_name, status ) ),
           "Mock Exam Items" ( id )
         `)
         .in('exam_id', examIds)
@@ -350,7 +351,10 @@ function FacultyExamsContent() {
         const accentColors = ['bg-emerald-500', 'bg-amber-500', 'bg-slate-500', 'bg-blue-500', 'bg-purple-500'];
 
         const formattedExams = dbExams.map((exam: any, index: number) => {
-          const cohortsList = exam.Exam_Cohorts?.map((ec: any) => ec.Cohorts?.cohort_name).filter(Boolean) || [];
+          const cohortsList = exam.Exam_Cohorts?.map((ec: any) => {
+            if (!ec.Cohorts?.cohort_name) return null;
+            return ec.Cohorts.status === 'Archived' ? `${ec.Cohorts.cohort_name} (Archived)` : ec.Cohorts.cohort_name;
+          }).filter(Boolean) || [];
           const cohortIdList = exam.Exam_Cohorts?.map((ec: any) => ec.cohort_id).filter(Boolean) || [];
           const itemCount = exam['Mock Exam Items'] ? exam['Mock Exam Items'].length : 0;
           const targetPassingScore = exam.passing_percentage || exam.passing_score || 0;
@@ -1408,9 +1412,10 @@ function FacultyExamsContent() {
                       ) : (
                         editSelectedCohorts.map(id => {
                           const cohort = teacherCohorts.find(c => c.id === id);
+                          const displayName = cohort?.status === 'Archived' ? `${cohort.name} (Archived)` : cohort?.name || 'Unknown Cohort';
                           return (
                             <span key={id} className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 border border-blue-200 text-blue-900 text-xs font-bold rounded-md z-10">
-                              {cohort?.name || 'Unknown Cohort'}
+                              {displayName}
                               <button 
                                 type="button" 
                                 onClick={(e) => { 
@@ -1439,18 +1444,23 @@ function FacultyExamsContent() {
                           ) : (
                             teacherCohorts.map(c => {
                               const isSelected = editSelectedCohorts.includes(c.id);
+                              if (c.status === 'Archived' && !isSelected) return null;
+
+                              const displayName = c.status === 'Archived' ? `${c.name} (Archived)` : c.name;
+
                               return (
                                 <div 
                                   key={c.id} 
                                   onClick={() => {
+                                    if (c.status === 'Archived') return;
                                     setEditSelectedCohorts(prev => prev.includes(c.id) ? prev.filter(id => id !== c.id) : [...prev, c.id]);
                                   }}
-                                  className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${isSelected ? 'bg-blue-50' : 'hover:bg-slate-50'}`}
+                                  className={`flex items-center gap-3 px-4 py-3 ${c.status === 'Archived' && !isSelected ? 'cursor-not-allowed opacity-50' : 'cursor-pointer transition-colors hover:bg-slate-50'} ${isSelected ? 'bg-blue-50' : ''}`}
                                 >
                                   <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'}`}>
                                     {isSelected && <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                                   </div>
-                                  <span className={`text-sm font-bold ${isSelected ? 'text-blue-900' : 'text-slate-700'}`}>{c.name}</span>
+                                  <span className={`text-sm font-bold ${isSelected ? 'text-blue-900' : 'text-slate-700'}`}>{displayName}</span>
                                 </div>
                               );
                             })

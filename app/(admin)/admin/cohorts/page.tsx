@@ -6,6 +6,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import { usePagination } from '@/hooks/usePagination';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
+import { useToast } from '@/components/ui/ToastContext';
 
 interface Student {
   id: string;
@@ -24,7 +25,7 @@ interface Cohort {
   name: string;
   description: string;
   color: string;
-  account_status: string;
+  status: 'Active' | 'Archived';
   dateRange: string;
   start_date: string;
   end_date: string;
@@ -40,6 +41,7 @@ interface PendingRemoval {
 }
 
 export default function AdminCohortsPage() {
+  const { addToast } = useToast();
   const [selectedCohort, setSelectedCohort] = useState<string | null>(null);
   const [studentSearch, setStudentSearch] = useState('');
   const [cohortTab, setCohortTab] = useState('active');
@@ -65,6 +67,7 @@ export default function AdminCohortsPage() {
   const [cohortDesc, setCohortDesc] = useState('');
   const [cohortStart, setCohortStart] = useState('');
   const [cohortEnd, setCohortEnd] = useState('');
+  const [cohortStatus, setCohortStatus] = useState('Active');
   const [batchEmails, setBatchEmails] = useState('');
 
   const [availableStudentSearch, setAvailableStudentSearch] = useState('');
@@ -137,7 +140,7 @@ export default function AdminCohortsPage() {
         name: cohort.cohort_name,
         description: cohort.description || 'No description provided.',
         color: colors[index % colors.length],
-        account_status: cohort.account_status,
+        status: cohort.status || 'Active',
         dateRange: displayDate,
         start_date: rawStart,
         end_date: rawEnd,
@@ -167,6 +170,28 @@ export default function AdminCohortsPage() {
     fetchCohortsData();
   }, []);
 
+
+  const handleToggleArchive = async (cohortId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'Active' ? 'Archived' : 'Active';
+
+    // Optimistic update
+    setCohorts(prev => prev.map(c => c.id === cohortId ? { ...c, status: newStatus as any } : c));
+
+    const { error } = await supabase
+      .from('Cohorts')
+      .update({ status: newStatus })
+      .eq('cohort_id', cohortId);
+
+    if (error) {
+      addToast(`Failed to update cohort status: ${error.message}`, 'error');
+      // Revert optimistic update
+      setCohorts(prev => prev.map(c => c.id === cohortId ? { ...c, status: currentStatus as any } : c));
+    } else {
+      addToast(`Cohort ${newStatus === 'Active' ? 'unarchived' : 'archived'} successfully`, 'success');
+      await logWorkspaceAction(`${newStatus === 'Active' ? 'Unarchived' : 'Archived'} cohort: ${cohortId}`);
+    }
+  };
+
   const handleCreateCohortSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoadingMessage('Creating new cohort...');
@@ -174,8 +199,6 @@ export default function AdminCohortsPage() {
 
     const now = new Date();
     const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const calculatedStatus = cohortEnd < currentYearMonth ? 'Archived' : 'Active';
-
     const { error } = await supabase
       .from('Cohorts')
       .insert([{
@@ -183,11 +206,11 @@ export default function AdminCohortsPage() {
         description: cohortDesc,
         start_date: `${cohortStart}-01`, 
         end_date: `${cohortEnd}-01`,
-        account_status: calculatedStatus 
+        status: 'Active'
       }]);
 
     if (!error) {
-      await logWorkspaceAction(`Created new cohort: ${cohortName} (${calculatedStatus})`);
+      await logWorkspaceAction(`Created new cohort: ${cohortName} (Active)`);
       await fetchCohortsData();
       closeModals();
     }
@@ -201,8 +224,6 @@ export default function AdminCohortsPage() {
 
     const now = new Date();
     const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    const calculatedStatus = cohortEnd < currentYearMonth ? 'Archived' : 'Active';
-
     const { error } = await supabase
       .from('Cohorts')
       .update({
@@ -210,7 +231,7 @@ export default function AdminCohortsPage() {
         description: cohortDesc,
         start_date: `${cohortStart}-01`, 
         end_date: `${cohortEnd}-01`,
-        account_status: calculatedStatus 
+        status: cohortStatus
       })
       .eq('cohort_id', selectedCohort);
 
@@ -314,6 +335,7 @@ export default function AdminCohortsPage() {
     setCohortDesc(cohort.description);
     setCohortStart(cohort.start_date);
     setCohortEnd(cohort.end_date);
+    setCohortStatus(cohort.status || 'Active');
     setShowEditModal(true);
   };
 
@@ -338,7 +360,7 @@ export default function AdminCohortsPage() {
   } = usePagination(filteredStudents, 5);
 
   const displayedCohorts = cohorts.filter(c => 
-    cohortTab === 'active' ? c.account_status === 'Active' : c.account_status === 'Archived'
+    cohortTab === 'active' ? c.status === 'Active' : c.status === 'Archived'
   );
 
   const availableTeachers = allUsersDB.filter(u => u.role_id === 2 && !currentCohort?.teachers.some(t => t.id === u.user_id));
@@ -419,13 +441,13 @@ export default function AdminCohortsPage() {
               </svg>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-800">{currentCohort.name}</h1>
+              <h1 className="text-2xl font-bold text-slate-800">{currentCohort.name}{currentCohort.status === 'Archived' && ' (Archived)'}</h1>
               <p className="text-sm text-slate-500 font-bold">{currentCohort.description}</p>
               <div className="flex gap-2 mt-2">
                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider ${
-                  currentCohort.account_status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'
+                  currentCohort.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'
                  }`}>
-                  {currentCohort.account_status}
+                  {currentCohort.status}
                  </span>
                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 uppercase tracking-wider">
                    {currentCohort.dateRange}
@@ -433,12 +455,20 @@ export default function AdminCohortsPage() {
               </div>
             </div>
           </div>
-          <button 
-            onClick={() => openEditModal(currentCohort)}
-            className="px-4 py-2 border border-slate-300 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
-          >
-            Edit Cohort Details
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleToggleArchive(currentCohort.id, currentCohort.status)}
+              className="px-4 py-2 border border-slate-300 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
+            >
+              {currentCohort.status === 'Active' ? 'Archive' : 'Unarchive'}
+            </button>
+            <button
+              onClick={() => openEditModal(currentCohort)}
+              className="px-4 py-2 border border-slate-300 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
+            >
+              Edit Cohort Details
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -713,11 +743,11 @@ export default function AdminCohortsPage() {
               <div className="p-6 flex-1 flex flex-col justify-between">
                 <div>
                   <div className="flex justify-between items-start mb-4">
-                    <h3 className="font-bold text-lg text-slate-800 leading-snug pr-3">{cohort.name}</h3>
+                    <h3 className="font-bold text-lg text-slate-800 leading-snug pr-3">{cohort.name}{cohort.status === 'Archived' && ' (Archived)'}</h3>
                     <span className={`shrink-0 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                      cohort.account_status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
+                      cohort.status === 'Active' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'
                     }`}>
-                      {cohort.account_status}
+                      {cohort.status}
                     </span>
                   </div>
                   <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Schedule</p>
@@ -728,9 +758,18 @@ export default function AdminCohortsPage() {
                   </div>
                 </div>
                 <div className="mt-6 pt-5 border-t border-slate-100">
-                  <button onClick={() => setSelectedCohort(cohort.id)} className="w-full py-2.5 text-sm font-bold rounded-lg transition-colors shadow-sm bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200">
-                    Manage Workspace
-                  </button>
+                  <div className="flex gap-2">
+                    <button onClick={() => setSelectedCohort(cohort.id)} className="flex-1 py-2.5 text-sm font-bold rounded-lg transition-colors shadow-sm bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200">
+                      Manage Workspace
+                    </button>
+                    <button
+                      onClick={() => handleToggleArchive(cohort.id, cohort.status)}
+                      className="px-4 py-2.5 text-sm font-bold rounded-lg transition-colors shadow-sm bg-white text-slate-700 border border-slate-200 hover:bg-slate-50"
+                      title={cohort.status === 'Active' ? 'Archive Cohort' : 'Unarchive Cohort'}
+                    >
+                      {cohort.status === 'Active' ? 'Archive' : 'Unarchive'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

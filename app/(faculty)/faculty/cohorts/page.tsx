@@ -18,7 +18,7 @@ interface CohortSummary {
   cohort_id: string;
   cohort_name: string;
   description: string | null;
-  account_status: string;
+  status: 'Active' | 'Archived';
   start_date: string | null;
   end_date: string | null;
   student_count: number;
@@ -156,7 +156,7 @@ export default function FacultyCohortsPage() {
           cohort_id: c.cohort_id,
           cohort_name: c.cohort_name,
           description: c.description,
-          account_status: c.account_status || 'Active',
+          status: c.status || 'Active',
           start_date: c.start_date,
           end_date: c.end_date,
           student_count: studentCount || 0,
@@ -684,7 +684,7 @@ export default function FacultyCohortsPage() {
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-black text-slate-800">{selectedCohort.cohort_name}</h1>
               <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-[10px] font-bold uppercase tracking-wider">
-                {selectedCohort.account_status}
+                {selectedCohort.status}
               </span>
             </div>
             <p className="text-sm text-slate-500 font-medium mt-1 max-w-xl">
@@ -1390,7 +1390,7 @@ export default function FacultyCohortsPage() {
                         {c.cohort_name}
                       </h3>
                       <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[10px] font-bold uppercase tracking-wider shrink-0">
-                        {c.account_status}
+                        {c.status}
                       </span>
                     </div>
 

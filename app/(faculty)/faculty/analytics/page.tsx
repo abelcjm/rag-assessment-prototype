@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useToast } from '@/components/ui/ToastContext';
 
 interface CohortBreakdown {
+  status?: 'Active' | 'Archived';
   cohortName: string;
   total: number;
   failed: number;
